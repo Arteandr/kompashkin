@@ -1,4 +1,4 @@
-import { VK } from "vk-io";
+import { ButtonColor, Keyboard, VK } from "vk-io";
 import { Main } from "../app";
 import {ChatModel} from "../db/models/ChatModel";
 import iEvent from "../interfaces/iEvent";
@@ -42,7 +42,24 @@ export default class ChatJoinEvent implements iEvent {
                     });
 
                     if(await BanController.inBan(ctx.eventMemberId,ctx.chatId)){
-                        await ctx.send(`Пользователь [id${user[0].id}|${user[0].first_name}] заблокирован в этой беседе.`);
+                        await ctx.send({
+                            message: `Пользователь [id${user[0].id}|${user[0].first_name}] заблокирован в этой беседе.`,
+                            keyboard: Keyboard.builder()
+                                .textButton({
+                                    label: "Разблокировать",
+                                    color: ButtonColor.POSITIVE,
+                                    payload: {
+                                        command: "unban",
+                                        data: {
+                                            userId: user[0].id,
+                                            chatId: ctx.chatId,
+                                        }
+                                    }
+                                })
+                                .oneTime(true)
+                                .inline()
+
+                        });
                         return await KickControllerCMD.kick(ctx.eventMemberId,ctx.chatId,this.vk);
                     };
                 };
