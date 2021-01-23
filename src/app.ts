@@ -8,15 +8,20 @@ import Cmd from "./cmd";
 import { VKWorker } from "./vk";
 import { VK } from "vk-io";
 import errorMiddleware from "./middlewares/error";
+import Database from "./db/db";
+import ChatJoinEvent from "./events/join";
+import Event from "./event";
 
 
 export class Main {
+
+    ID: number = -201992571;
 
     // Модули
     logger: Logger = new Logger();
     cmd!: Cmd;
     vkWorker: VKWorker = new VKWorker(this);
-
+    event!: Event;
 
     // Аллиасы
     info = (msg: string) => this.logger.info(msg);
@@ -24,8 +29,9 @@ export class Main {
     warning = (msg: string) => this.logger.warning(msg);
     error = (msg: string) => this.logger.error(msg);
 
-    vk!: VK;
+    db: Database = new Database(this);
 
+    vk!: VK;
 
     // Middlewares
     errorMiddleware!: errorMiddleware;
@@ -36,6 +42,8 @@ export class Main {
             this.vk = await this.vkWorker.init();
             this.errorMiddleware = new errorMiddleware(this.vk);
             this.cmd = new Cmd(this,this.vk);
+            this.event = new Event(this.vk,this);
+
             await this.cmd.init();
 
             process.on('SIGINT',() => this.shutdown());
@@ -50,6 +58,9 @@ export class Main {
             await this.vkWorker.start();
             await this.errorMiddleware.start();
             await this.cmd.start();
+            await this.event.loadAll();
+            await this.db.start();
+
 
             process.on('uncaughtException', error => {
                 this.error(`Runtime error: ${error.stack}`);

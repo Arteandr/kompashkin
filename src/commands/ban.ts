@@ -1,12 +1,12 @@
 import { HearManager } from "@vk-io/hear";
 import {  MessageContext, VK } from "vk-io";
 import CMD from "../cmd";
-import KickControllerCMD from "../commandControllers/kickController";
+import BanController from "../db/banController";
 import iCommand from "../interfaces/iCommand";
 
-export default class KickCommand implements iCommand{
-    name = "кик";
-    description = "удалить пользователя из беседы";
+export default class BanCommand implements iCommand{
+    name = "бан";
+    description = "забанить пользователя";
     manager;
     cmd;
     vk;
@@ -16,18 +16,18 @@ export default class KickCommand implements iCommand{
         this.cmd = cmd;
         this.vk = vk;
     }
-    
+
     handler(): iCommand{
-        this.manager.hear(/^кик(?:\s+(?<text>.+)|$)/i,async (ctx) => { 
+        this.manager.hear(/^бан(?:\s+(?<text>.+)|$)/i,async (ctx) => { 
             if(ctx.chatId){
                 if(ctx.hasReplyMessage ){
-                    await KickControllerCMD.kick(ctx.replyMessage!.senderId,ctx.chatId,this.vk);
+                        await BanController.ban(ctx.replyMessage!.senderId,ctx.chatId,ctx,this.vk);
                 }else if(!ctx.hasReplyMessage){
                     if(ctx.$match[1]){
-                    const userId = Number(ctx.$match[1].replace(/\D+/g,""));
-                    await KickControllerCMD.kick(userId,ctx.chatId,this.vk);
+                        const userId = Number(ctx.$match[1].replace(/\D+/g,""));
+                        await BanController.ban(userId,ctx.chatId,ctx,this.vk);
                     }else {
-                        await ctx.send("Используйте: кик @user");
+                        await ctx.send("Используйте: бан @user");
                     }
                 }
             }

@@ -34,6 +34,7 @@ export default class StatusCommand implements iCommand{
             ctx.sendPhotos({
                 value: "https://sun9-15.userapi.com/impf/6wCmag0xpR0tyyhduU294XadkeDxhdT61v2fDA/F2ep5m3zkW4.jpg?size=1077x1080&quality=96&proxy=1&sign=0793879963ee920cd1948f2833b6fe44&type=album"
             });
+            
         });
         return {
             name: this.name,

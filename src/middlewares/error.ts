@@ -13,6 +13,7 @@ export default class errorMiddleware {
             try {
                 await next();
             } catch (error) {
+                console.log(error);
                 context.send(`Отказано в доступе. Код ошибки: ${error.code}`);
             }
         })
